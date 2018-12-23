@@ -1,4 +1,3 @@
-// TODO: Add ORM   <br /> 
 // TODO: Save tx to db <br />
 // TODO: Finish get tx for account <br /> 
 // TODO: Docerize backend <br />
