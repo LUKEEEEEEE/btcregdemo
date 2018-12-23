@@ -6,8 +6,6 @@ RUN apt-get update
 RUN apt-get install --yes bitcoind
 ADD ./conf /root/.bitcoin    
 WORKDIR /root/
-EXPOSE 11000
-EXPOSE 11001
 CMD ["bitcoind", "-debug"]
 
 #CMD ["/bin/bash"]

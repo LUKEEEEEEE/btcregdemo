@@ -4,21 +4,9 @@ services:
     build:
       context: ./btc_node_1
     ports:
-      - "5000:11001"
-    networks:
-      lukanet:
-        ipv4_address: 172.20.0.5
+      - "5000:11001"    
   node2:
     build:
       context: ./btc_node_2
     ports:
       - "5001:12001"
-    networks:
-      lukanet:
-        ipv4_address: 172.20.0.6
-
-networks:
-  lukanet:
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
