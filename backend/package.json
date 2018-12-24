@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "@types/lodash": "^4.14.119",
+    "deasync": "^0.1.14",
     "express": "^4.16.4",
     "lodash": "^4.17.11",
     "mysql": "^2.16.0",

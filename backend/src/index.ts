@@ -1,31 +1,36 @@
 import app from './App';
 import "reflect-metadata";
 import {createConnection} from "typeorm";
-
 import {BtcTransaction} from "./entity/BtcTransaction";
+import {BtcInTx} from './entity/BtcInTx';
+
 
 let mysql = require('mysql');
-
-let con = mysql.createConnection({
+let mysql_connection_conf = {
     host: "localhost",
     port: "5306",
     user: "root",
     password: "rootpass"
-});
+};
 
 
-
-con.connect((err) => {
-    if (err) throw err;
-    console.log("Connected!");
-    // silently ignore error if db already created! This deserves better error handling!
+let is_db_created = false;
+while (!is_db_created) {
+    let con = mysql.createConnection(mysql_connection_conf);
+    con.connect((err) => {
+        if (err) return;
+        console.log("[CONNECTED]");
         con.query("CREATE DATABASE btctx", (err, result) => {
             (!err)
-                ? console.log("Database created")
-                : console.log("DATABASE ALREADY CREATED");
-        })
-});
-
+                ? console.log("[DATABASE CREATED]")
+                : console.log("[DATABASE ALREADY CREATED]");
+            is_db_created = true;
+        });
+        con.end();
+    });
+    require('deasync').sleep(5000);
+    console.warn("[RECONNECTING]")
+}
 
 createConnection({
     type: "mysql",
@@ -35,13 +40,17 @@ createConnection({
     password: "rootpass",
     database: "btctx",
     entities: [
-        BtcTransaction
+        BtcTransaction,
+        BtcInTx
     ],
     synchronize: true,
     logging: false
 }).then(connection => {
-    console.log("ORM LOADED, ENTITIES SCANNED")
-}).catch(error => console.log(error));
+    console.log("[ORM LOADED, ENTITIES SCANNED]")
+}).catch(error => {
+    console.log("[ERROR LOADING ORM]");
+    console.error(error);
+});
 
 const port = process.env.PORT || 3000;
 

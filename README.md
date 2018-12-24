@@ -1,4 +1,3 @@
-// TODO: Save tx to db <br />
 // TODO: Finish get tx for account <br /> 
 // TODO: Docerize backend <br />
 // TODO: Add loadbalancer in case of node going down <br /> 

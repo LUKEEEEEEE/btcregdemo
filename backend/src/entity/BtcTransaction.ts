@@ -1,9 +1,11 @@
-import {Column, Entity, PrimaryGeneratedColumn} from "typeorm";
+import {Column, Entity, OneToMany, PrimaryGeneratedColumn} from "typeorm";
+import {BtcInTx} from "./BtcInTx";
 
 @Entity()
 export class BtcTransaction {
+
     @PrimaryGeneratedColumn()
-    public id: number;
+    public id: Number;
 
     @Column()
     public address: String;
@@ -15,9 +17,6 @@ export class BtcTransaction {
     public confirmations: Number;
 
     @Column()
-    public generated: Boolean;
-
-    @Column()
     public blockhash: String;
 
     @Column()
@@ -25,4 +24,21 @@ export class BtcTransaction {
 
     @Column()
     public txid: String;
+
+    @Column()
+    public label: String = "";
+
+    @OneToMany(type => BtcInTx, (btcInTx:BtcInTx) => btcInTx.outtx)
+    public intxs: BtcInTx[];
+
+    constructor(tx) {
+        if (!tx) return;
+        this.address = tx.address;
+        this.amount = tx.amount;
+        this.confirmations = tx.confirmations;
+        this.blockhash = tx.blockhash;
+        this.blocktime = tx.blocktime;
+        this.txid = tx.txid;
+        if (tx.label) this.label = tx.label;
+    }
 }

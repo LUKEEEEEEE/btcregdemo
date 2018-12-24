@@ -1,7 +1,10 @@
 import * as express from 'express'
 import * as request from 'request';
+import {createConnection, getConnection} from "typeorm";
+import {BtcTransaction} from "./entity/BtcTransaction";
 import {StaticFunctions} from './config';
 import * as _ from 'lodash';
+import {TransactionHandler} from "./logic/TransactionHandler";
 
 enum AddressTypes {
     BECH_32 = "bech32",
@@ -32,6 +35,7 @@ class App {
 
         router.get('/list_transactions', async (req, res) => {
             await this.sync_blockchain_to_mysql();
+            let txes = await getConnection().manager.find(BtcTransaction);
             return res.json({});
         });
 
@@ -46,25 +50,39 @@ class App {
     private async sync_blockchain_to_mysql() {
         let params = [];
         if (this.last_block_parsed) {
-            params = [this.last_block_parsed, 0]
+            params = [this.last_block_parsed]
         }
         const options = StaticFunctions.get_http_options({
             "method": "listsinceblock",
             "params": params
         });
-
         return new Promise((resolve, reject) => {
-            request(options, (err, res, body) => {
+            request(options, async (err, res, body) => {
                 if (err) reject(err);
                 let out = {};
-                if (body.result) {
-                    // new block was mined. Store all tx to db
-                    const transactions = body.result['transactions'];
-                    const last_block = _.maxBy(transactions, (tx) => tx['blocktime']);
-                    console.log(last_block);
-                    this.last_block_parsed = last_block['blockhash'];
-                    console.log(this.last_block_parsed);
-                    out = transactions;
+                if (!body.result) {
+                    resolve(out);
+                    return;
+                }
+
+                // new block was mined. Store all tx to db
+                const transactions = body.result['transactions'];
+                if (transactions.length == 0) {
+                    resolve(out);
+                    return;
+                }
+                const last_block = _.maxBy(transactions, (tx) => tx['blocktime']);
+                this.last_block_parsed = last_block['blockhash'];
+                out = transactions;
+                let counter = 0;
+                for (let tx of transactions) {
+                    let transaction_handler = new TransactionHandler(tx);
+                    await transaction_handler.find_in_txs_and_save();
+
+                    // In case of 2 many tx, we need to manage worker queue depth. This is bad but simple workaround.
+                    counter = counter + 1;
+                    if (counter % 10 == 0)
+                        require('deasync').sleep(500);
                 }
                 resolve(out)
             })
@@ -114,7 +132,6 @@ class App {
     }
 
     private send_bitcoins(address: String, amount: String) {
-        console.log(1.1);
         const options = StaticFunctions.get_http_options({
             "method": "sendtoaddress",
             "params": [address, amount]
@@ -122,7 +139,6 @@ class App {
         return new Promise((resolve, reject) => {
             request(options, (err, res, body) => {
                 if (err) reject(err);
-                console.log(body);
                 resolve(body)
             })
         });
