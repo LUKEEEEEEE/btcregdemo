@@ -1,0 +1,47 @@
+<div class="container">
+  <h1>GH interview problem</h1>
+  <div class="row">
+    <button class="btn btn-default float-right" (click)="generate_blocks(101)">GENERATE 101 BLOCKS</button>
+    <button class="btn btn-default" (click)="generate_blocks(5)">5 BLOCKS</button>
+  </div>
+
+  <div class="row">
+    <div class="input-group mb-3">
+      <input type="text" class="form-control" placeholder="btc address">
+      <div class="input-group-append">
+        <button class="btn btn-outline-secondary" type="button" (click)="list_tx(addy)">LIST TXS for address</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="input-group mb-3">
+      <input type="text" class="form-control" placeholder="btc address to send btc to" #addy>
+      <input type="number" class="form-control" placeholder="amount" #count>
+        <div class="input-group-append">
+          <button class="btn btn-outline-secondary" type="button" (click)="send_btc_to_addy(addy.value, count.value)">SEND BTC NOW</button>
+        </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="input-group mb-3">
+      <input type="text" class="form-control" placeholder="generated btc address" [readOnly]="true" [(ngModel)]="new_btc_address">
+        <div class="input-group-append">
+          <button class="btn btn-outline-secondary" type="button" (click)="get_new_address()">Generate new btc address</button>
+        </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <button class="btn btn-primary" (click)="get_balance()">Get balance</button> <br>
+  </div>
+  <div class="row">
+    <ul class="list-group">
+      <li class="list-group-item" *ngFor="let addy of my_addresses">{{addy.address}} &nbsp;&nbsp;&nbsp;&nbsp; {{addy.btc_count}}</li>
+    </ul>
+  </div>
+
+
+  <!--<router-outlet></router-outlet>-->
+</div>

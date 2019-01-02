@@ -1,3 +1,16 @@
 backend/.idea/*
 backend/node_modules/*
 backend/dist/*
+frontend/node_modules
+frontend/dist
+frontend/out-tsc
+frontend/tmp
+
+frontend//.sass-cache
+frontend//connect.lock
+frontend//coverage
+frontend//libpeerconnection.log
+frontend/npm-debug.log
+frontend/yarn-error.log
+frontend/testem.log
+frontend//typings

@@ -1,4 +1,4 @@
-import app from './App';
+import app from './app';
 import "reflect-metadata";
 import {createConnection} from "typeorm";
 import {BtcTransaction} from "./entity/BtcTransaction";
@@ -7,12 +7,11 @@ import {BtcInTx} from './entity/BtcInTx';
 
 let mysql = require('mysql');
 let mysql_connection_conf = {
-    host: "localhost",
-    port: "5306",
+    host: "db",
+    port: "3306",
     user: "root",
     password: "rootpass"
 };
-
 
 let is_db_created = false;
 while (!is_db_created) {
@@ -34,8 +33,8 @@ while (!is_db_created) {
 
 createConnection({
     type: "mysql",
-    host: "localhost",
-    port: 5306,
+    host: "db",
+    port: 3306,
     username: "root",
     password: "rootpass",
     database: "btctx",

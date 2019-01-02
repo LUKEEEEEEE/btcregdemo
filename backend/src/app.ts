@@ -1,10 +1,12 @@
 import * as express from 'express'
+import * as cors from 'cors';
 import * as request from 'request';
-import {createConnection, getConnection} from "typeorm";
+import {getConnection} from "typeorm";
 import {BtcTransaction} from "./entity/BtcTransaction";
 import {StaticFunctions} from './config';
 import * as _ from 'lodash';
 import {TransactionHandler} from "./logic/TransactionHandler";
+
 
 enum AddressTypes {
     BECH_32 = "bech32",
@@ -18,6 +20,7 @@ class App {
 
     constructor () {
         this.express = express();
+        this.express.use(cors());
         this.mountRoutes();
     }
 
@@ -33,6 +36,7 @@ class App {
             return res.json(out);
         });
 
+        // huh, idk ??
         router.get('/list_transactions', async (req, res) => {
             await this.sync_blockchain_to_mysql();
             let txes = await getConnection().manager.find(BtcTransaction);
@@ -40,9 +44,21 @@ class App {
         });
 
         router.get('/send_bitcoins', async (req, res) => {
-            let out = await this.send_bitcoins(req.query.address, req.query.amount);
+            console.log(1);
+            let out = await this.send_bitcoins(req.query.address, parseFloat(req.query.amount));
             return res.json(out);
         });
+
+        router.get('/generate_bitcoins', async (req, res) => {
+            let out = await this.generate_bitcoins(parseInt(req.query.count));
+            return res.json(out);
+        });
+
+        router.get('/ping', async (req, res) => {
+            let out = {"msg": "pong"};
+            return res.json(out);
+        });
+
 
         this.express.use('/', router);
     }
@@ -89,7 +105,22 @@ class App {
         });
     }
 
-    private async new_account(address_type: AddressTypes = AddressTypes.STANDARD) {
+    private async generate_bitcoins(count: number) {
+        const options = StaticFunctions.get_http_options({
+            "method": "generate",
+            "params": [count]
+        });
+
+        return new Promise((resolve, reject) => {
+                request(options, (err, res, body) => {
+                    if (err) reject(err);
+                    resolve(body.result);
+                })
+            });
+    }
+
+
+    private async new_account(address_type: AddressTypes = AddressTypes.BECH_32) {
         let options = {};
         // maybe just add new field instead of if/else
         if (address_type == AddressTypes.BECH_32) {
@@ -110,7 +141,7 @@ class App {
         });
     }
 
-    private async  get_balances_by_address() {
+    private async get_balances_by_address() {
         const options = StaticFunctions.get_http_options({
             "method": "listunspent"
         });
@@ -131,11 +162,12 @@ class App {
             });
     }
 
-    private send_bitcoins(address: String, amount: String) {
+    private send_bitcoins(address: String, amount: number) {
         const options = StaticFunctions.get_http_options({
             "method": "sendtoaddress",
             "params": [address, amount]
         });
+        console.log(options);
         return new Promise((resolve, reject) => {
             request(options, (err, res, body) => {
                 if (err) reject(err);

@@ -3,18 +3,26 @@ services:
   node1:
     build:
       context: ./btc_node_1
-    ports:
-      - "5000:11001"    
   node2:
     build:
       context: ./btc_node_2
-    ports:
-      - "5001:12001"
   db:
     image: mysql
     command: --default-authentication-plugin=mysql_native_password
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: rootpass
-    ports: 
-      - "5306:3306"
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend

@@ -5,7 +5,7 @@ const PASSWORD = 'somepass';
 export class StaticFunctions {
     static get_http_options(body: Object = {}): Object {
         return {
-            url: 'http://localhost:5000/',
+            url: 'http://frontend:9000/',
             method: 'POST',
             json: true,
             headers: {
